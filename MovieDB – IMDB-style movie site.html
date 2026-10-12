@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MovieDB – Ratings, Reviews and Watchlists</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e0e10;--panel:#1a1a1e;--line:#2c2c33;--txt:#f2f0ea;--mut:#a0a0aa;--acc:#f5c518;--accfg:#111;--star:#f5c518;--ok:#6fcf97;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f4f3ef;--panel:#fff;--line:#dcdad2;--txt:#17171a;--mut:#5f5f69;--star:#c99a00;--ok:#1d7a46}}
+:root[data-theme="light"]{--bg:#f4f3ef;--panel:#fff;--line:#dcdad2;--txt:#17171a;--mut:#5f5f69;--star:#c99a00;--ok:#1d7a46}
+:root[data-theme="dark"]{--bg:#0e0e10;--panel:#1a1a1e;--line:#2c2c33;--txt:#f2f0ea;--mut:#a0a0aa;--star:#f5c518;--ok:#6fcf97}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--txt);font:400 16px/1.5 Barlow,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:10px 20px}
+.logo{font:700 26px/1 "Barlow Condensed",Impact,sans-serif;background:var(--acc);color:var(--accfg);padding:6px 10px;border:0;border-radius:4px;letter-spacing:.5px}
+nav{display:flex;gap:4px}
+nav button{background:none;border:0;padding:8px 12px;border-radius:6px;color:var(--mut);font-weight:600}
+nav button[aria-current="page"]{color:var(--txt);background:var(--panel)}
+nav .n{background:var(--acc);color:var(--accfg);border-radius:9px;font-size:12px;padding:0 6px;margin-left:5px}
+.search{flex:1 1 220px;min-width:0}
+.search input{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:9px 12px}
+.theme{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 10px}
+main{max-width:1200px;margin:0 auto;padding:20px}
+.hero{display:grid;grid-template-columns:200px 1fr;gap:28px;align-items:end;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px;margin-bottom:26px}
+.hero h1{font:700 clamp(36px,6vw,64px)/.95 "Barlow Condensed",Impact,sans-serif;margin:0 0 10px}
+.hero p{max-width:60ch;color:var(--mut);margin:0 0 16px}
+.meta{color:var(--mut);font-size:14px;margin-bottom:10px}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.btn{border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:9px 16px;font-weight:600}
+.btn.p{background:var(--acc);color:var(--accfg);border-color:var(--acc)}
+.btn.on{border-color:var(--ok);color:var(--ok)}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:4px 12px;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--acc);color:var(--accfg);border-color:var(--acc)}
+select{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 10px}
+select:disabled{opacity:.5}
+.count{color:var(--mut);font-size:14px;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:18px}
+.card{display:flex;flex-direction:column;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px}
+.open{background:none;border:0;padding:0;text-align:left;display:block;width:100%}
+.poster{aspect-ratio:2/3;border-radius:5px;display:flex;flex-direction:column;justify-content:flex-end;padding:12px;color:#fff;overflow:hidden;background:linear-gradient(160deg,hsl(var(--h) 55% 38%),hsl(calc(var(--h) + 45) 60% 13%))}
+.poster b{font:700 clamp(18px,2.4vw,24px)/1 "Barlow Condensed",Impact,sans-serif;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+.poster i{font-style:normal;font-size:13px;opacity:.85;margin-top:4px}
+.card h3{font-size:16px;line-height:1.25;margin:0}
+.rt{color:var(--mut);font-size:14px}
+.rt .s{color:var(--star)}
+.rt .u{color:var(--ok);margin-left:6px}
+.wl{margin-top:auto;border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:6px 8px;font-size:14px;font-weight:600}
+.wl.on{color:var(--ok);border-color:var(--ok)}
+.rows{display:flex;flex-direction:column;gap:10px}
+.row{display:grid;grid-template-columns:44px 64px 1fr auto auto;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+.row .rk{font:700 30px/1 "Barlow Condensed",Impact,sans-serif;color:var(--acc);text-align:center}
+.row h3{margin:0;font-size:17px}
+.row .poster{padding:6px}.row .poster b{font-size:11px}.row .poster i{display:none}
+.empty{text-align:center;color:var(--mut);padding:60px 20px;border:1px dashed var(--line);border-radius:10px}
+.ov{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.7);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:max(20px,env(safe-area-inset-top,0px)) 16px 20px}
+.ov[hidden]{display:none}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;max-width:820px;width:100%;padding:24px;display:grid;grid-template-columns:220px 1fr;gap:24px;position:relative}
+.modal h2{font:700 clamp(30px,5vw,46px)/1 "Barlow Condensed",Impact,sans-serif;margin:0 28px 8px 0}
+.x{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--bg)}
+.big{font-size:22px;font-weight:600}.big .s{color:var(--star)}
+.big small{font-size:14px;color:var(--mut);font-weight:400}
+dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:14px 0}
+dt{color:var(--mut)}dd{margin:0}
+.stars{display:flex;flex-wrap:wrap;gap:2px;margin:6px 0 14px}
+.stars button{background:none;border:0;font-size:24px;line-height:1;padding:2px;color:var(--line)}
+.stars button.f{color:var(--star)}
+.sim{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--txt);color:var(--bg);padding:9px 16px;border-radius:20px;font-weight:600;z-index:30;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+footer{text-align:center;color:var(--mut);font-size:13px;padding:30px 20px}
+@media (max-width:640px){
+.hero{grid-template-columns:1fr}.hero .poster{max-width:150px}
+.modal{grid-template-columns:1fr}.modal .poster{max-width:160px}
+.row{grid-template-columns:36px 52px 1fr auto}.row .wl{grid-column:2 / -1}
+}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<div id="app">
+<header class="bar">
+  <button class="logo" data-nav="home" aria-label="MovieDB home">MovieDB</button>
+  <nav aria-label="Main">
+    <button data-nav="home" id="nHome">Browse</button>
+    <button data-nav="top" id="nTop">Top rated</button>
+    <button data-nav="watch" id="nWatch">Watchlist<span class="n" id="wlCount">0</span></button>
+  </nav>
+  <div class="search"><input id="q" type="search" placeholder="Search titles, directors or actors" aria-label="Search movies" autocomplete="off"></div>
+  <button class="theme" id="theme" aria-label="Switch colour theme">Theme</button>
+</header>
+<main>
+  <section id="hero" aria-label="Featured"></section>
+  <div class="tools">
+    <div class="chips" id="chips" role="group" aria-label="Filter by genre"></div>
+    <label>Sort by <select id="sort">
+      <option value="rating">Rating</option><option value="votes">Most votes</option><option value="year">Newest</option><option value="title">Title A–Z</option><option value="runtime">Longest</option>
+    </select></label>
+  </div>
+  <p class="count" id="count" aria-live="polite"></p>
+  <section id="content"></section>
+</main>
+<footer>MovieDB is a demo with a small sample catalogue. Your ratings and watchlist are saved in this browser.</footer>
+</div>
+
+<div class="ov" id="ov" hidden>
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mt"></div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+"use strict";
+var RAW=[
+[1,"The Shawshank Redemption",1994,9.3,3100,142,"Drama","Frank Darabont","Tim Robbins;Morgan Freeman;Bob Gunton","A banker jailed for a murder he denies forms a quiet, lasting friendship while he plans his way out."],
+[2,"The Godfather",1972,9.2,2200,175,"Crime;Drama","Francis Ford Coppola","Marlon Brando;Al Pacino;James Caan","The aging head of a crime dynasty hands control to his reluctant youngest son."],
+[3,"The Dark Knight",2008,9.0,3000,152,"Action;Crime;Drama","Christopher Nolan","Christian Bale;Heath Ledger;Aaron Eckhart","Batman faces an anarchic criminal who pushes Gotham and its heroes to breaking point."],
+[4,"Schindler's List",1993,9.0,1500,195,"Biography;Drama;History","Steven Spielberg","Liam Neeson;Ben Kingsley;Ralph Fiennes","A businessman in wartime Poland risks everything to shelter his Jewish workers."],
+[5,"Pulp Fiction",1994,8.9,2400,154,"Crime;Drama","Quentin Tarantino","John Travolta;Uma Thurman;Samuel L. Jackson","Intertwined stories of hitmen, a boxer and a gangster's wife unfold across Los Angeles."],
+[6,"The Lord of the Rings: The Return of the King",2003,9.0,2100,201,"Adventure;Fantasy","Peter Jackson","Elijah Wood;Viggo Mortensen;Ian McKellen","The final battle for Middle-earth begins as the Ring nears the fires of Mount Doom."],
+[7,"Forrest Gump",1994,8.8,2400,142,"Drama;Romance","Robert Zemeckis","Tom Hanks;Robin Wright;Gary Sinise","A kind-hearted man drifts through decades of American history, one remarkable moment after another."],
+[8,"Inception",2010,8.8,2700,148,"Action;Sci-Fi;Thriller","Christopher Nolan","Leonardo DiCaprio;Joseph Gordon-Levitt;Elliot Page","A thief who steals secrets from dreams is offered a chance to plant an idea instead."],
+[9,"Fight Club",1999,8.8,2500,139,"Drama","David Fincher","Brad Pitt;Edward Norton;Helena Bonham Carter","An insomniac office worker and a soap salesman start an underground club that grows out of control."],
+[10,"The Matrix",1999,8.7,2100,136,"Action;Sci-Fi","Lana and Lilly Wachowski","Keanu Reeves;Laurence Fishburne;Carrie-Anne Moss","A hacker discovers his reality is a simulation and joins a rebellion against its machine rulers."],
+[11,"Interstellar",2014,8.7,2300,169,"Adventure;Drama;Sci-Fi","Christopher Nolan","Matthew McConaughey;Anne Hathaway;Jessica Chastain","Explorers travel through a wormhole to find humanity a new home as Earth fails."],
+[12,"Goodfellas",1990,8.7,1300,145,"Biography;Crime;Drama","Martin Scorsese","Robert De Niro;Ray Liotta;Joe Pesci","The rise and fall of a young mobster and his crew over three decades."],
+[13,"Parasite",2019,8.5,1000,132,"Comedy;Drama;Thriller","Bong Joon Ho","Song Kang-ho;Lee Sun-kyun;Cho Yeo-jeong","A struggling family schemes its way into the lives of a wealthy household, with unexpected results."],
+[14,"Spirited Away",2001,8.6,850,125,"Animation;Adventure;Fantasy","Hayao Miyazaki","Rumi Hiiragi;Miyu Irino;Mari Natsuki","A girl wanders into a world of spirits and must work at a bathhouse to free her parents."],
+[15,"Gladiator",2000,8.5,1600,155,"Action;Adventure;Drama","Ridley Scott","Russell Crowe;Joaquin Phoenix;Connie Nielsen","A betrayed Roman general returns as a gladiator to take revenge on the emperor."],
+[16,"The Silence of the Lambs",1991,8.6,1500,118,"Crime;Drama;Thriller","Jonathan Demme","Jodie Foster;Anthony Hopkins;Scott Glenn","A young FBI trainee seeks help from an imprisoned genius to catch another killer."],
+[17,"Whiplash",2014,8.5,1000,106,"Drama;Music","Damien Chazelle","Miles Teller;J.K. Simmons;Paul Reiser","A driven jazz drummer is pushed to his limits by a ruthless conservatory teacher."],
+[18,"Spider-Man: Into the Spider-Verse",2018,8.4,700,117,"Animation;Action;Adventure","Bob Persichetti","Shameik Moore;Jake Johnson;Hailee Steinfeld","Teenager Miles Morales meets other Spider-People from across the multiverse."],
+[19,"Mad Max: Fury Road",2015,8.1,1100,120,"Action;Adventure;Sci-Fi","George Miller","Tom Hardy;Charlize Theron;Nicholas Hoult","In a desert wasteland, a drifter and a rebel commander flee a warlord in one long chase."],
+[20,"The Grand Budapest Hotel",2014,8.1,900,99,"Adventure;Comedy;Crime","Wes Anderson","Ralph Fiennes;F. Murray Abraham;Tony Revolori","A legendary concierge and his lobby boy are caught up in a theft and a family feud."],
+[21,"Alien",1979,8.5,950,117,"Horror;Sci-Fi","Ridley Scott","Sigourney Weaver;Tom Skerritt;John Hurt","The crew of a cargo ship is hunted by a deadly creature that came aboard."],
+[22,"Toy Story",1995,8.3,1100,81,"Animation;Adventure;Comedy","John Lasseter","Tom Hanks;Tim Allen;Don Rickles","A cowboy doll feels threatened when a new space ranger toy becomes his owner's favourite."],
+[23,"La La Land",2016,8.0,750,128,"Comedy;Drama;Music","Damien Chazelle","Ryan Gosling;Emma Stone;John Legend","A pianist and an actress chase their dreams in Los Angeles and fall in love."],
+[24,"Oppenheimer",2023,8.3,900,180,"Biography;Drama;History","Christopher Nolan","Cillian Murphy;Emily Blunt;Robert Downey Jr.","The story of the physicist who led the creation of the atomic bomb and the cost that followed."]
+];
+var M=RAW.map(function(a){return{id:a[0],t:a[1],y:a[2],r:a[3],v:a[4],m:a[5],g:a[6].split(";"),d:a[7],c:a[8].split(";"),p:a[9]};});
+var byId={};M.forEach(function(m){byId[m.id]=m;});
+var GENRES=["All"].concat(Array.from(new Set([].concat.apply([],M.map(function(m){return m.g;})))).sort());
+var S={view:"home",q:"",g:"All",sort:"rating",rt:{},wl:[],open:null};
+var last=null,tt=null;
+
+function $(s){return document.querySelector(s);}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function load(){try{var d=JSON.parse(localStorage.getItem("moviedb")||"{}");
+  if(d.rt&&typeof d.rt==="object")S.rt=d.rt;
+  if(Array.isArray(d.wl))S.wl=d.wl.filter(function(i){return byId[i];});
+  if(d.theme==="light"||d.theme==="dark")document.documentElement.setAttribute("data-theme",d.theme);}catch(e){}}
+function save(){try{localStorage.setItem("moviedb",JSON.stringify({rt:S.rt,wl:S.wl,theme:document.documentElement.getAttribute("data-theme")||""}));}catch(e){}}
+function hue(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%360;return h;}
+function poster(m){return '<div class="poster" style="--h:'+hue(m.t)+'"><b>'+esc(m.t)+'</b><i>'+m.y+'</i></div>';}
+function votes(v){return v>=1000?(v/1000).toFixed(1)+"M":v+"K";}
+function dur(m){return Math.floor(m/60)+"h "+(m%60)+"m";}
+function toast(t){var el=$("#toast");el.textContent=t;el.classList.add("show");clearTimeout(tt);tt=setTimeout(function(){el.classList.remove("show");},1800);}
+function inWl(id){return S.wl.indexOf(id)>-1;}
+function wlBtn(m,cls){var on=inWl(m.id);return '<button class="'+cls+(on?" on":"")+'" data-wl="'+m.id+'" aria-pressed="'+on+'">'+(on?"✓ In watchlist":"+ Watchlist")+'</button>';}
+function stars(m){return '<span class="rt"><span class="s">★</span> '+m.r.toFixed(1)+(S.rt[m.id]?'<span class="u">You: '+S.rt[m.id]+'</span>':"")+'</span>';}
+
+function list(){
+  var q=S.q.trim().toLowerCase();
+  var a=M.filter(function(m){
+    if(S.view==="watch"&&!inWl(m.id))return false;
+    if(S.g!=="All"&&m.g.indexOf(S.g)<0)return false;
+    return !q||(m.t+" "+m.d+" "+m.c.join(" ")+" "+m.y).toLowerCase().indexOf(q)>-1;
+  });
+  var key=S.view==="top"?"rating":S.sort;
+  var f={rating:function(x,y){return y.r-x.r||y.v-x.v;},votes:function(x,y){return y.v-x.v;},year:function(x,y){return y.y-x.y;},title:function(x,y){return x.t.localeCompare(y.t);},runtime:function(x,y){return y.m-x.m;}};
+  return a.sort(f[key]);
+}
+
+function render(){
+  var home=S.view==="home";
+  ["Home","Top","Watch"].forEach(function(n){var b=$("#n"+n);if(("home"===S.view&&n==="Home")||("top"===S.view&&n==="Top")||("watch"===S.view&&n==="Watch"))b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
+  $("#wlCount").textContent=S.wl.length;
+  $("#sort").disabled=S.view==="top";
+  $("#sort").value=S.sort;
+  $("#chips").innerHTML=GENRES.map(function(g){return '<button class="chip" data-g="'+esc(g)+'" aria-pressed="'+(g===S.g)+'">'+esc(g)+'</button>';}).join("");
+  var hero=$("#hero");
+  if(home&&!S.q.trim()&&S.g==="All"){
+    var f=M[new Date().getDate()%M.length];
+    hero.innerHTML='<div class="hero"><div>'+poster(f)+'</div><div><div class="meta">Featured today · '+f.y+' · '+dur(f.m)+' · '+esc(f.g.join(", "))+'</div><h1>'+esc(f.t)+'</h1><p>'+esc(f.p)+'</p><div class="meta">'+stars(f)+' · '+votes(f.v)+' votes · Directed by '+esc(f.d)+'</div><div class="btns"><button class="btn p" data-open="'+f.id+'">View details</button>'+wlBtn(f,"btn")+'</div></div></div>';
+  }else hero.innerHTML="";
+  var a=list();
+  var label=S.view==="top"?"Top rated":S.view==="watch"?"In your watchlist":"Titles";
+  $("#count").textContent=label+": "+a.length;
+  var c=$("#content");
+  if(!a.length){
+    c.innerHTML='<div class="empty">'+(S.view==="watch"&&!S.wl.length?"Your watchlist is empty. Use “+ Watchlist” on any title to save it here.":"No titles match your search. Try a different name or clear the genre filter.")+'</div>';
+    return;
+  }
+  if(S.view==="top"){
+    c.innerHTML='<div class="rows">'+a.map(function(m,i){return '<div class="row"><div class="rk">'+(i+1)+'</div><button class="open" data-open="'+m.id+'" aria-label="Open '+esc(m.t)+'">'+poster(m)+'</button><div><h3>'+esc(m.t)+' <span class="rt">('+m.y+')</span></h3><div class="rt">'+dur(m.m)+' · '+esc(m.g.join(", "))+' · '+votes(m.v)+' votes</div></div>'+stars(m)+wlBtn(m,"wl")+'</div>';}).join("")+'</div>';
+  }else{
+    c.innerHTML='<div class="grid">'+a.map(function(m){return '<article class="card"><button class="open" data-open="'+m.id+'" aria-label="Open '+esc(m.t)+'">'+poster(m)+'</button>'+stars(m)+'<h3>'+esc(m.t)+'</h3>'+wlBtn(m,"wl")+'</article>';}).join("")+'</div>';
+  }
+}
+
+function renderModal(){
+  var m=byId[S.open];if(!m)return;
+  var mine=S.rt[m.id]||0,s="";
+  for(var i=1;i<=10;i++)s+='<button class="'+(i<=mine?"f":"")+'" data-star="'+i+'" aria-label="Rate '+i+' out of 10" aria-pressed="'+(i===mine)+'">★</button>';
+  var sim=M.filter(function(x){return x.id!==m.id;}).map(function(x){return{x:x,n:x.g.filter(function(g){return m.g.indexOf(g)>-1;}).length};}).filter(function(o){return o.n>0;}).sort(function(a,b){return b.n-a.n||b.x.r-a.x.r;}).slice(0,4);
+  $("#modal").innerHTML='<button class="x" data-close aria-label="Close details">✕</button><div>'+poster(m)+'</div><div><h2 id="mt">'+esc(m.t)+'</h2><div class="rt">'+m.y+' · '+dur(m.m)+' · '+esc(m.g.join(", "))+'</div><p>'+esc(m.p)+'</p><div class="big"><span class="s">★</span> '+m.r.toFixed(1)+'<small>/10 · '+votes(m.v)+' votes</small></div><dl><dt>Director</dt><dd>'+esc(m.d)+'</dd><dt>Stars</dt><dd>'+esc(m.c.join(", "))+'</dd></dl><div><strong>'+(mine?"Your rating: "+mine+"/10":"Rate this title")+'</strong></div><div class="stars" role="group" aria-label="Your rating">'+s+'</div><div class="btns">'+wlBtn(m,"btn p")+(mine?'<button class="btn" data-unrate>Clear rating</button>':"")+'</div><div class="sim">'+sim.map(function(o){return '<button class="chip" data-open="'+o.x.id+'">'+esc(o.x.t)+'</button>';}).join("")+'</div></div>';
+}
+function openM(id){
+  if(!byId[id])return;
+  if(!S.open)last=document.activeElement;
+  S.open=id;renderModal();
+  $("#ov").hidden=false;$("#app").inert=true;$("#ov").scrollTop=0;
+  var x=$("#modal .x");if(x)x.focus();
+}
+function closeM(){
+  S.open=null;$("#ov").hidden=true;$("#app").inert=false;
+  if(last&&document.body.contains(last)){try{last.focus();}catch(e){}}
+}
+function toggleWl(id){
+  var i=S.wl.indexOf(id);
+  if(i>-1){S.wl.splice(i,1);toast("Removed from watchlist");}else{S.wl.push(id);toast("Added to watchlist");}
+  save();render();if(S.open)renderModal();
+}
+
+document.addEventListener("click",function(e){
+  var t=e.target.closest("[data-open],[data-wl],[data-nav],[data-g],[data-star],[data-close],[data-unrate]");
+  if(!t){if(e.target.id==="ov")closeM();return;}
+  var d=t.dataset;
+  if(d.open!==undefined){openM(Number(d.open));return;}
+  if(d.wl!==undefined){var id=Number(d.wl);var keep=document.activeElement;toggleWl(id);
+    var n=document.querySelector('[data-wl="'+id+'"]');if(S.open&&keep&&keep.dataset&&keep.dataset.wl){var mb=$("#modal [data-wl]");if(mb)mb.focus();}return;}
+  if(d.nav){S.view=d.nav;if(S.open)closeM();render();window.scrollTo(0,0);return;}
+  if(d.g!==undefined){S.g=d.g;render();return;}
+  if(d.star){var id2=S.open,v=Number(d.star);if(S.rt[id2]===v){delete S.rt[id2];toast("Rating cleared");}else{S.rt[id2]=v;toast("Rated "+v+"/10");}
+    save();renderModal();render();var sb=$('#modal [data-star="'+v+'"]');if(sb)sb.focus();return;}
+  if(d.unrate!==undefined){delete S.rt[S.open];save();renderModal();render();toast("Rating cleared");return;}
+  if(d.close!==undefined){closeM();}
+});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&S.open)closeM();});
+$("#q").addEventListener("input",function(e){S.q=e.target.value;render();});
+$("#sort").addEventListener("change",function(e){S.sort=e.target.value;render();});
+$("#theme").addEventListener("click",function(){
+  var r=document.documentElement,cur=r.getAttribute("data-theme");
+  if(!cur)cur=window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";
+  r.setAttribute("data-theme",cur==="dark"?"light":"dark");save();
+});
+load();render();
+})();
+</script>
+</body>
+</html>
